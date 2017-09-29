@@ -1,0 +1,23 @@
+sg_group_id: sg-14550d65,sg-0a560e7b
+
+ami_id: ami-c998b6b2
+
+service_name: tomcat
+
+ec2_instance_type: t2.small
+
+instance_count: 1
+
+name_key: new
+
+ec2_region: us-east-1
+
+profile_name: ecsInstanceRole
+
+subnet_id: subnet-e3ca2787
+
+
+service_group: tomcat_server
+
+
+tag_ec2_group: "{{ service_name }}"

@@ -1,0 +1,50 @@
+- name: Launch base server
+  ec2:
+    assign_public_ip: yes
+    group_id: "{{ sg_group_id }}"
+    image: "{{ ami_id }}"
+    instance_type: "{{ ec2_instance_type }}"
+    instance_profile_name: "{{ profile_name }}"
+    count_tag: 
+      Group: "{{ tag_ec2_group }}"
+    exact_count: "{{ instance_count }}"
+    key_name: "{{ name_key }}"
+    region: "{{ ec2_region }}"
+    vpc_subnet_id: "{{ subnet_id }}"
+    wait: yes
+    assign_public_ip: yes
+    instance_tags: {
+      "Name": "tomcat",
+    }
+  register: ec2
+
+- name: wait until host is running state
+  shell: aws ec2 describe-instances --region "{{ ec2_region }}" --instance-ids "{{ item.id }}" --query Reservations[0].Instances[0].State.Name --output text
+  register: state
+  until: state.stdout == "running"
+  retries: 10
+  delay: 30
+  with_items: "{{ ec2.instances }}"
+
+
+- name: Get the ipaddress of first instance
+  set_fact:
+     ip_address_inst: "{{ ec2.instances[0].public_ip }}"
+
+- name: Add host to the selenium group
+  add_host:
+      groups: tomcat
+      name: "{{ ip_address_inst }}"
+      ansible_user: ec2-user
+      ansible_port: 22
+      ansible_ssh_private_key_file: "/tmp/new.pem"
+      ansible_become_user: root
+      ansible_become: true
+- name: wait for ssh port
+  wait_for:
+      host: "{{ ip_address_inst }}"
+      port: 22
+      delay: 60
+      timeout: 100
+      state: started
+

@@ -1,0 +1,23 @@
+#ec2 launch and install tomcat
+---
+- name: Setup EC2
+  hosts: localhost
+  gather_facts: no
+  roles:
+    - infrastructure
+- name: install tomcat
+  remote_user: ec2-user
+  sudo: yes
+  hosts: tomcat
+  roles:
+    - tomcat
+
+### deploying the war file to tomcat server
+
+- name: deploy app
+  remote_user: ec2-user
+  sudo: yes
+  hosts: tomcat
+  roles:
+    - deploy_app
+

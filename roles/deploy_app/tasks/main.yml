@@ -1,0 +1,14 @@
+- name: Deploy war file
+  template:
+    src: index.html
+    dest: /var/www/html/
+    mode: '0777'
+  register: war_deployed
+ 
+- name: Restart tomcat
+  service:
+    name: httpd
+    state: restarted
+  when: war_deployed.changed
+
+
